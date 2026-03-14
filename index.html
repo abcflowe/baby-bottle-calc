@@ -114,6 +114,11 @@
   .scale-arrow { color: #6b5d4f; font-size: 14px; }
   .scale-grams { text-align: right; font-weight: 700; color: #e8c98e; font-size: 20px; }
   .scale-water { text-align: right; color: #7ec4e0; }
+  .suggestion { margin-top: 20px; padding-top: 16px; border-top: 1px solid #3d3630; }
+  .suggestion-text {
+    font-size: 14px; color: #c4b8aa; line-height: 1.5;
+  }
+  .suggestion-text strong { color: #7ec47e; }
   .scale-totals { margin-top: 20px; padding-top: 16px; border-top: 1px solid #3d3630; }
 </style>
 </head>
@@ -207,6 +212,19 @@ function renderScoop() {
     </div>`;
   }
 
+  let suggestionHTML = "";
+  if (waste > 1.5) {
+    const fewerScoops = scoops - 1;
+    const fewerMade = fewerScoops * OZ_PER_SCOOP;
+    suggestionHTML = `<div class="suggestion">
+      <div class="bd-label">Suggestion</div>
+      <div class="suggestion-text">
+        Use <strong>${fewerScoops} scoop${fewerScoops !== 1 ? "s" : ""}</strong> instead for
+        <strong>${fewerMade.toFixed(1)}oz</strong> total — only ${(totalOz - fewerMade).toFixed(1)}oz less than requested
+      </div>
+    </div>`;
+  }
+
   el.innerHTML = `<div class="results">
     <div class="hero-display">
       <span class="hero-num">${scoops}</span>
@@ -222,6 +240,7 @@ function renderScoop() {
       <div><div class="stat-label">Extra</div><div class="stat-val" style="color:${waste === 0 ? '#7ec47e' : '#e8c98e'}">${waste === 0 ? "None!" : waste.toFixed(1) + "oz"}</div></div>
     </div>
     ${breakdownHTML}
+    ${suggestionHTML}
   </div>`;
 }
 
