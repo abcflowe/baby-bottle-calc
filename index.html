@@ -106,7 +106,7 @@ function render() {
   const container = document.getElementById("bottles");
   container.innerHTML = bottles.map((val, i) => `
     <div class="bottle-row">
-      <input type="number" inputmode="decimal" placeholder="Bottle ${i + 1}"
+      <input type="number" step="any" inputmode="decimal" placeholder="Bottle ${i + 1}"
         value="${val}" oninput="updateBottle(${i}, this.value)"
         onfocus="this.style.borderColor='#c4a882'"
         onblur="this.style.borderColor='#e8e2db'">
