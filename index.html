@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Formula Calc">
+<title>Formula Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    min-height: 100vh;
+    background: #faf8f5;
+    font-family: 'DM Sans', 'Avenir', sans-serif;
+    display: flex;
+    justify-content: center;
+  }
+  .wrap { width: 100%; max-width: 420px; padding: 40px 24px 32px; }
+  .header { text-align: center; margin-bottom: 32px; }
+  .header .icon { font-size: 32px; margin-bottom: 4px; }
+  .header h1 {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 26px; font-weight: 400; color: #2a2520; margin: 0 0 4px;
+  }
+  .header p { color: #8a8078; font-size: 13px; }
+  .label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em; color: #8a8078; margin-bottom: 10px;
+  }
+  .bottle-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .bottle-row input {
+    flex: 1; padding: 14px 16px; font-size: 18px;
+    font-family: 'DM Sans', sans-serif; border: 2px solid #e8e2db;
+    border-radius: 12px; background: #fff; color: #2a2520; outline: none;
+    transition: border-color 0.15s; -webkit-appearance: none;
+  }
+  .bottle-row input:focus { border-color: #c4a882; }
+  .remove-btn {
+    width: 40px; height: 48px; border: none; background: none;
+    color: #c4b8aa; font-size: 22px; cursor: pointer; border-radius: 8px;
+    flex-shrink: 0;
+  }
+  .actions { display: flex; gap: 8px; margin-bottom: 32px; }
+  .add-btn {
+    flex: 1; padding: 12px 0; font-size: 14px; font-weight: 600;
+    font-family: 'DM Sans', sans-serif; color: #6b5d4f;
+    background: #f0ebe4; border: none; border-radius: 10px; cursor: pointer;
+  }
+  .clear-btn {
+    padding: 12px 20px; font-size: 14px; font-weight: 500;
+    font-family: 'DM Sans', sans-serif; color: #a89a8c; background: none;
+    border: 2px solid #e8e2db; border-radius: 10px; cursor: pointer;
+  }
+  .results {
+    background: #2a2520; border-radius: 16px; padding: 28px 24px; color: #faf8f5;
+  }
+  .scoop-display { display: flex; justify-content: center; align-items: baseline; gap: 6px; margin-bottom: 24px; }
+  .scoop-num {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 56px; line-height: 1; color: #e8c98e;
+  }
+  .scoop-label { font-size: 18px; color: #c4b8aa; font-weight: 500; }
+  .stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; text-align: center; }
+  .stats .stat-label {
+    font-size: 11px; color: #8a8078; text-transform: uppercase;
+    letter-spacing: 0.06em; margin-bottom: 4px;
+  }
+  .stats .stat-val { font-size: 18px; font-weight: 600; }
+  .breakdown { margin-top: 20px; padding-top: 16px; border-top: 1px solid #3d3630; }
+  .breakdown .bd-label {
+    font-size: 11px; color: #8a8078; text-transform: uppercase;
+    letter-spacing: 0.06em; margin-bottom: 8px;
+  }
+  .bd-row {
+    display: flex; justify-content: space-between; padding: 4px 0;
+    font-size: 14px; color: #c4b8aa;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="icon">🍼</div>
+    <h1>Formula Calculator</h1>
+    <p>1 scoop = 2oz water + 0.2oz powder = 2.2oz</p>
+  </div>
+
+  <div class="label">Bottles (oz)</div>
+  <div id="bottles"></div>
+
+  <div class="actions">
+    <button class="add-btn" onclick="addBottle()">+ Add Bottle</button>
+    <button class="clear-btn" onclick="clearAll()">Clear</button>
+  </div>
+
+  <div id="results"></div>
+</div>
+
+<script>
+const OZ_PER_SCOOP = 2.2;
+let bottles = [""];
+
+function render() {
+  const container = document.getElementById("bottles");
+  container.innerHTML = bottles.map((val, i) => `
+    <div class="bottle-row">
+      <input type="number" inputmode="decimal" placeholder="Bottle ${i + 1}"
+        value="${val}" oninput="updateBottle(${i}, this.value)"
+        onfocus="this.style.borderColor='#c4a882'"
+        onblur="this.style.borderColor='#e8e2db'">
+      <button class="remove-btn" onclick="removeBottle(${i})">×</button>
+    </div>
+  `).join("");
+
+  const parsed = bottles.map(b => parseFloat(b) || 0);
+  const totalOz = parsed.reduce((s, b) => s + b, 0);
+  const el = document.getElementById("results");
+
+  if (totalOz === 0) { el.innerHTML = ""; return; }
+
+  const scoops = Math.ceil(totalOz / OZ_PER_SCOOP);
+  const totalMade = (scoops * OZ_PER_SCOOP);
+  const waste = totalMade - totalOz;
+  const nonZero = parsed.filter(b => b > 0);
+
+  let breakdownHTML = "";
+  if (nonZero.length > 1) {
+    breakdownHTML = `<div class="breakdown">
+      <div class="bd-label">Breakdown</div>
+      ${nonZero.map(oz => {
+        const s = oz / OZ_PER_SCOOP;
+        const disp = s % 1 === 0 ? s.toString() : "~" + s.toFixed(1);
+        return `<div class="bd-row"><span>${oz}oz bottle</span><span>${disp} scoops</span></div>`;
+      }).join("")}
+    </div>`;
+  }
+
+  el.innerHTML = `<div class="results">
+    <div class="scoop-display">
+      <span class="scoop-num">${scoops}</span>
+      <span class="scoop-label">scoop${scoops !== 1 ? "s" : ""}</span>
+    </div>
+    <div class="stats">
+      <div><div class="stat-label">Need</div><div class="stat-val">${totalOz}oz</div></div>
+      <div><div class="stat-label">Makes</div><div class="stat-val">${totalMade.toFixed(1)}oz</div></div>
+      <div><div class="stat-label">Extra</div><div class="stat-val" style="color:${waste === 0 ? '#7ec47e' : '#e8c98e'}">${waste === 0 ? "None!" : waste.toFixed(1) + "oz"}</div></div>
+    </div>
+    ${breakdownHTML}
+  </div>`;
+}
+
+function addBottle() { bottles.push(""); render(); }
+function updateBottle(i, val) { bottles[i] = val; render(); }
+function removeBottle(i) {
+  if (bottles.length === 1) { bottles = [""]; } else { bottles.splice(i, 1); }
+  render();
+}
+function clearAll() { bottles = [""]; render(); }
+
+render();
+</script>
+</body>
+</html>
