@@ -56,12 +56,18 @@
   .results {
     background: #2a2520; border-radius: 16px; padding: 28px 24px; color: #faf8f5;
   }
-  .scoop-display { display: flex; justify-content: center; align-items: baseline; gap: 6px; margin-bottom: 24px; }
+  .scoop-display { display: flex; justify-content: center; align-items: baseline; gap: 6px; margin-bottom: 8px; }
   .scoop-num {
     font-family: 'DM Serif Display', Georgia, serif;
     font-size: 56px; line-height: 1; color: #e8c98e;
   }
   .scoop-label { font-size: 18px; color: #c4b8aa; font-weight: 500; }
+  .water-display { display: flex; justify-content: center; align-items: baseline; gap: 6px; margin-bottom: 24px; }
+  .water-num {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 56px; line-height: 1; color: #7ec4e0;
+  }
+  .water-label { font-size: 18px; color: #c4b8aa; font-weight: 500; }
   .stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; text-align: center; }
   .stats .stat-label {
     font-size: 11px; color: #8a8078; text-transform: uppercase;
@@ -100,7 +106,7 @@
 
 <script>
 const OZ_PER_SCOOP = 2.2;
-let bottles = [""];
+let bottles = JSON.parse(localStorage.getItem("bottles")) || [""];
 
 function renderBottles() {
   const container = document.getElementById("bottles");
@@ -143,7 +149,11 @@ function renderResults() {
   el.innerHTML = `<div class="results">
     <div class="scoop-display">
       <span class="scoop-num">${scoops}</span>
-      <span class="scoop-label">scoop${scoops !== 1 ? "s" : ""} · ${scoops * 2}oz water</span>
+      <span class="scoop-label">scoop${scoops !== 1 ? "s" : ""}</span>
+    </div>
+    <div class="water-display">
+      <span class="water-num">${scoops * 2}</span>
+      <span class="water-label">oz water</span>
     </div>
     <div class="stats">
       <div><div class="stat-label">Need</div><div class="stat-val">${totalOz}oz</div></div>
@@ -154,13 +164,14 @@ function renderResults() {
   </div>`;
 }
 
-function addBottle() { bottles.push(""); renderBottles(); }
-function updateBottle(i, val) { bottles[i] = val; renderResults(); }
+function addBottle() { bottles.push(""); saveBottles(); renderBottles(); }
+function saveBottles() { localStorage.setItem("bottles", JSON.stringify(bottles)); }
+function updateBottle(i, val) { bottles[i] = val; saveBottles(); renderResults(); }
 function removeBottle(i) {
   if (bottles.length === 1) { bottles = [""]; } else { bottles.splice(i, 1); }
-  renderBottles();
+  saveBottles(); renderBottles();
 }
-function clearAll() { bottles = [""]; renderBottles(); }
+function clearAll() { bottles = [""]; saveBottles(); renderBottles(); }
 
 renderBottles();
 </script>
