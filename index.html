@@ -102,18 +102,21 @@
 const OZ_PER_SCOOP = 2.2;
 let bottles = [""];
 
-function render() {
+function renderBottles() {
   const container = document.getElementById("bottles");
   container.innerHTML = bottles.map((val, i) => `
     <div class="bottle-row">
-      <input type="number" step="any" inputmode="decimal" placeholder="Bottle ${i + 1}"
+      <input type="text" inputmode="decimal" placeholder="Bottle ${i + 1}"
         value="${val}" oninput="updateBottle(${i}, this.value)"
         onfocus="this.style.borderColor='#c4a882'"
         onblur="this.style.borderColor='#e8e2db'">
       <button class="remove-btn" onclick="removeBottle(${i})">×</button>
     </div>
   `).join("");
+  renderResults();
+}
 
+function renderResults() {
   const parsed = bottles.map(b => parseFloat(b) || 0);
   const totalOz = parsed.reduce((s, b) => s + b, 0);
   const el = document.getElementById("results");
@@ -151,15 +154,15 @@ function render() {
   </div>`;
 }
 
-function addBottle() { bottles.push(""); render(); }
-function updateBottle(i, val) { bottles[i] = val; render(); }
+function addBottle() { bottles.push(""); renderBottles(); }
+function updateBottle(i, val) { bottles[i] = val; renderResults(); }
 function removeBottle(i) {
   if (bottles.length === 1) { bottles = [""]; } else { bottles.splice(i, 1); }
-  render();
+  renderBottles();
 }
-function clearAll() { bottles = [""]; render(); }
+function clearAll() { bottles = [""]; renderBottles(); }
 
-render();
+renderBottles();
 </script>
 </body>
 </html>
