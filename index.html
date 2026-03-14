@@ -114,6 +114,7 @@
   .scale-arrow { color: #6b5d4f; font-size: 14px; }
   .scale-grams { text-align: right; font-weight: 700; color: #e8c98e; font-size: 20px; }
   .scale-water { text-align: right; color: #7ec4e0; }
+  .scale-totals { margin-top: 20px; padding-top: 16px; border-top: 1px solid #3d3630; }
 </style>
 </head>
 <body>
@@ -231,6 +232,11 @@ function renderScale() {
 
   if (nonZero.length === 0) { el.innerHTML = ""; return; }
 
+  const totalOz = nonZero.reduce((s, b) => s + b, 0);
+  const totalScoops = totalOz / OZ_PER_SCOOP;
+  const totalGrams = totalScoops * GRAMS_PER_SCOOP;
+  const totalWaterOz = totalScoops * WATER_OZ_PER_SCOOP;
+
   const bottleRows = nonZero.map(oz => {
     const scoops = oz / OZ_PER_SCOOP;
     const grams = scoops * GRAMS_PER_SCOOP;
@@ -251,6 +257,16 @@ function renderScale() {
       <span>Water</span>
     </div>
     ${bottleRows}
+    <div class="scale-totals">
+      <div class="hero-display">
+        <span class="hero-num">${totalGrams.toFixed(1)}</span>
+        <span class="hero-label">grams total</span>
+      </div>
+      <div class="water-display">
+        <span class="water-num">${totalWaterOz.toFixed(1)}</span>
+        <span class="water-label">oz water total</span>
+      </div>
+    </div>
   </div>`;
 }
 
